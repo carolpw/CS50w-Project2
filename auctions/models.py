@@ -6,16 +6,19 @@ class User(AbstractUser):
     pass
 
 class Category(models.Model):
-    name = models.CharField(max_length=16)
+    name = models.CharField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Listing(models.Model):
-    name = models.CharField(max_length=32)
+    title = models.CharField(max_length=32)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="owner")
     description = models.CharField(max_length=256)
     price = models.FloatField()
     date =  models.DateField(auto_now=True)
-    image = models.CharField(max_length=256) #ImageField, install Pillow?
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category")
+    image = models.CharField(max_length=256, blank=True) #ImageField, install Pillow?
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category", blank=True)
 
 class Bids(models.Model):
     pass

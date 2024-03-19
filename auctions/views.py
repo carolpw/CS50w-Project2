@@ -3,8 +3,8 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-
 from .models import User
+from .forms import ListingForm
 
 
 def index(request):
@@ -64,11 +64,25 @@ def register(request):
 
 
 def create_listing(request):
-    return render(request, "auctions/createListing.html")
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = ListingForm(request.POST)
+        if form.is_valid():
+            # Set the owner field to the current user
+            form.instance.owner = request.user
+            form.save()
+            # redirect to a new URL:
+            return HttpResponseRedirect(reverse('index')) #INDEX? MAYBE CHANGE. I couldn't do it with 'auctions:index'
 
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = ListingForm()
+
+    return render(request, 'auctions/createListing.html', {'form': form})
 
 def watchlist(request):
     return render(request, "auctions/watchlist.html")
 
 def categories(request):
     return render(request, "auctions/categories.html")
+
