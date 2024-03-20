@@ -19,6 +19,7 @@ class Listing(models.Model):
     date =  models.DateField(auto_now=True)
     image = models.CharField(max_length=256, blank=True) #ImageField, install Pillow?
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category", blank=True)
+    active = models.BooleanField(default=True)
 
 class Bids(models.Model):
     pass
