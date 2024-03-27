@@ -4,13 +4,15 @@
     <h2>Active Listings</h2>
 
     {% for listing in active_listings %}
-        <h3>{{ listing.title }}</h3>
+        <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
+        
+        
         {% if listing.image %}
-            {{ listing.image }}
+            <img src="{{ listing.image.url }}" alt="{{ listing.title }} Image" style="max-width: 150px;">                                                                                                                            
         {% endif %}
         <ul>
             <li>Description: {{ listing.description }}</li>
-            <li>Price: {{ listing.price }}</li>
+            <li>Price: ${{ listing.price }}</li>
         </ul>
     {% endfor %}
 {% endblock %}

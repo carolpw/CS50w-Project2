@@ -17,7 +17,7 @@ class Listing(models.Model):
     description = models.CharField(max_length=256)
     price = models.FloatField()
     date =  models.DateField(auto_now=True)
-    image = models.CharField(max_length=256, blank=True) #ImageField, install Pillow?
+    image = models.ImageField(null=True, blank=True, upload_to="images/")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="category", blank=True)
     active = models.BooleanField(default=True)
 

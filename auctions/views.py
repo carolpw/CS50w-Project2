@@ -69,7 +69,7 @@ def register(request):
 def create_listing(request):
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = ListingForm(request.POST)
+        form = ListingForm(request.POST, request.FILES)
         if form.is_valid():
             # Set the owner field to the current user
             form.instance.owner = request.user
@@ -89,3 +89,8 @@ def watchlist(request):
 def categories(request):
     return render(request, "auctions/categories.html")
 
+def listing(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    return render(request, "auctions/listing.html", {
+        "listing": listing
+    })
