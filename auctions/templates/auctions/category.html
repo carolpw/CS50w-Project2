@@ -1,0 +1,19 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h3>{{ category.name }}</h3>
+
+    {% for listing in listings_cat %}
+        <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
+        
+        
+        {% if listing.image %}
+            <img src="{{ listing.image.url }}" alt="{{ listing.title }} Image" style="max-width: 150px;">                                                                                                                            
+        {% endif %}
+        <ul>
+            <li>Description: {{ listing.description }}</li>
+            <li>Price: ${{ listing.price }}</li>
+        </ul>
+    {% endfor %}
+
+{% endblock %}

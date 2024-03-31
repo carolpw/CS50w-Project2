@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import User, Listing
+from .models import User, Listing, Category
 from .forms import ListingForm
 
 
@@ -87,10 +87,21 @@ def watchlist(request):
     return render(request, "auctions/watchlist.html")
 
 def categories(request):
-    return render(request, "auctions/categories.html")
+    categories = Category.objects.all()
+    return render(request, "auctions/categories.html", {
+        "categories": categories
+    })
 
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
     return render(request, "auctions/listing.html", {
         "listing": listing
+    })
+
+def category_listing(request, category_id):
+    listings_cat = Listing.objects.filter(active=True, category=category_id)
+    category = Category.objects.get(pk=category_id)
+    return render(request, "auctions/category.html", { # category or index?
+        "listings_cat": listings_cat,
+        "category": category
     })
