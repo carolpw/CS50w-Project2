@@ -3,5 +3,18 @@
 {% block body %}
     <h2>Watchlist</h2>
 
-    TODO
+    {% for listing in watchlist %}
+        <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
+        
+        {% if listing.image %}
+            <img src="{{ listing.image.url }}" alt="{{ listing.title }} Image" style="max-width: 150px;">                                                                                                                            
+        {% endif %}
+
+        <ul>
+            <li>Description: {{ listing.description }}</li>
+            <li>Price: ${{ listing.price }}</li>
+        </ul>
+    {% empty %}
+    <h3>No listings.</h3>    
+    {% endfor %}
 {% endblock %}

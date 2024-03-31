@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from .models import User, Listing, Category
 from .forms import ListingForm
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
@@ -83,8 +84,6 @@ def create_listing(request):
 
     return render(request, 'auctions/createListing.html', {'form': form})
 
-def watchlist(request):
-    return render(request, "auctions/watchlist.html")
 
 def categories(request):
     categories = Category.objects.all()
@@ -94,14 +93,36 @@ def categories(request):
 
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
+    in_watchlist = True
     return render(request, "auctions/listing.html", {
-        "listing": listing
+        "listing": listing,
+        "in_watchlist": in_watchlist
     })
 
 def category_listing(request, category_id):
     listings_cat = Listing.objects.filter(active=True, category=category_id)
     category = Category.objects.get(pk=category_id)
-    return render(request, "auctions/category.html", { # category or index?
+    return render(request, "auctions/category.html", { 
         "listings_cat": listings_cat,
         "category": category
     })
+
+@login_required
+def watchlist(request):
+    return render(request, "auctions/watchlist.html", {
+        "watchlist": request.user.watchlist.all()
+    })
+
+@login_required
+def watch(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    request.user.watchlist.add(listing)
+    request.user.save()
+    return HttpResponseRedirect(reverse('watchlist'))
+    
+@login_required
+def unwatch(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    request.user.watchlist.remove(listing)
+    request.user.save()
+    return HttpResponseRedirect(reverse('index'))

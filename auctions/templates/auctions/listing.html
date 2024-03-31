@@ -14,4 +14,13 @@
         <li>Category: {{ listing.category }}</a></li>
     </ul>
 
+    <div>
+        {% if user.is_authenticated %}
+            {% if listing in user.watchlist.all %}
+                <a class="text-danger" href="{% url 'unwatch' listing.id %}">Unwatch</a>
+            {% else %}
+                <a class="text-danger" href="{% url 'watch' listing.id %}">Watch</a>
+            {% endif %}
+        {% endif %}
+    </div>
 {% endblock %}
