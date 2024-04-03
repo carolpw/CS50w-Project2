@@ -4,7 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from .models import User, Listing, Category
-from .forms import ListingForm
+from .forms import ListingForm, CommentForm
 from django.contrib.auth.decorators import login_required
 
 
@@ -94,9 +94,26 @@ def categories(request):
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
     in_watchlist = True
+    form = None
+
+    #Comment section
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                form.instance.author = request.user
+                form.instance.listing = listing
+                form.save()
+                # Redirect to the same page after adding comment
+                return HttpResponseRedirect(reverse('listing', args=(listing_id, )))
+        else:
+            form = CommentForm()
+
+
     return render(request, "auctions/listing.html", {
         "listing": listing,
-        "in_watchlist": in_watchlist
+        "in_watchlist": in_watchlist,
+        "form": form
     })
 
 def category_listing(request, category_id):
@@ -126,3 +143,4 @@ def unwatch(request, listing_id):
     request.user.watchlist.remove(listing)
     request.user.save()
     return HttpResponseRedirect(reverse('index'))
+

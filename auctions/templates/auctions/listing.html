@@ -23,4 +23,31 @@
             {% endif %}
         {% endif %}
     </div>
+    <section>
+        <h3>Comments:</h3>
+        {% if not listing.comments.all %}
+            <p>No comments yet.</p>
+        {% else %}
+            {% for comment in listing.comments.all %}
+                <hr>
+                <strong>{{ comment.author }} - {{ comment.date_added}} </strong>
+                <br>
+                {{ comment.text }}
+            {% endfor %}    
+        {% endif %}
+
+        {% if user.is_authenticated %}
+            <form action="{% url 'listing' listing.id %}" method="POST">
+                {% csrf_token %}
+                {{ form.text }}
+                <input class="btn btn-lg btn-outline-secondary" type="submit" value="Add">
+            </form>
+        {% else %}
+            <p>Please log in to add a comment.</p>
+        {% endif %}
+
+        
+    </section>
+
+
 {% endblock %}

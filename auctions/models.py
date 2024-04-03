@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -23,10 +24,14 @@ class Listing(models.Model):
     active = models.BooleanField(default=True)
     
 
-class Bids(models.Model):
+class Bid(models.Model):
     pass
 
-class Comments(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
-    text = models.CharField(max_length=256)
+class Comment(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    text = models.TextField()
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
+    date_added = models.DateTimeField(default=timezone.now, editable=False)
 
+def __str__(self):
+    return f"Comment by {self.author.username} on {self.listing.title}"
