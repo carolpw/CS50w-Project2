@@ -3,7 +3,7 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
-from .models import User, Listing, Category
+from .models import User, Listing, Category, Bid
 from .forms import ListingForm, CommentForm
 from django.contrib.auth.decorators import login_required
 
@@ -72,9 +72,16 @@ def create_listing(request):
         # create a form instance and populate it with data from the request:
         form = ListingForm(request.POST, request.FILES)
         if form.is_valid():
-            # Set the owner field to the current user
-            form.instance.owner = request.user
-            form.save()
+            # Save the listing
+            listing = form.save(commit=False)
+            listing.owner = request.user
+            listing.save()
+
+            # Create a bid with the starting bid entered in the form
+            starting_bid = form.cleaned_data['starting_bid']
+            bid = Bid(user=request.user, amount=starting_bid, listing=listing)
+            bid.save()
+            
             # redirect to a new URL:
             return HttpResponseRedirect(reverse('index')) #INDEX? MAYBE CHANGE. I couldn't do it with 'auctions:index'
 
@@ -93,6 +100,7 @@ def categories(request):
 
 def listing(request, listing_id):
     listing = Listing.objects.get(pk=listing_id)
+    current_price = listing.bids.order_by('-amount').first().amount if listing.bids.exists() else 0
     in_watchlist = True
     form = None
 
@@ -112,6 +120,7 @@ def listing(request, listing_id):
 
     return render(request, "auctions/listing.html", {
         "listing": listing,
+        "current_price": current_price,
         "in_watchlist": in_watchlist,
         "form": form
     })

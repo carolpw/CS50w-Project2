@@ -12,9 +12,9 @@
 
         <ul>
             <li>Description: {{ listing.description }}</li>
-            <li>Price: ${{ listing.price }}</li>
+            <li>Current Price: ${{ current_price }}</li>
         </ul>
     {% empty %}
-    <h3>No listings.</h3>    
+    <p>No listings.</p>    
     {% endfor %}
 {% endblock %}
