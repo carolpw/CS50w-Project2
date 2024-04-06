@@ -3,7 +3,7 @@
 {% block body %}
     <h3>{{ category.name }}</h3>
 
-    {% for listing in listings_cat %}
+    {% for listing, current_price in listings_with_prices %}
         <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
         
         
@@ -12,7 +12,7 @@
         {% endif %}
         <ul>
             <li>Description: {{ listing.description }}</li>
-            <li>Price: ${{ listing.price }}</li>
+            <li>Current Price: ${{ current_price }}</li>
         </ul>
     {% endfor %}
 

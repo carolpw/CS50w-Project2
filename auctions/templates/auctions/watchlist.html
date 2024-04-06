@@ -3,7 +3,7 @@
 {% block body %}
     <h2>Watchlist</h2>
 
-    {% for listing in watchlist %}
+    {% for listing, current_price in listings_with_prices %}
         <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
         
         {% if listing.image %}

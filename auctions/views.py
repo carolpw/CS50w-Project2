@@ -8,10 +8,19 @@ from .forms import ListingForm, CommentForm
 from django.contrib.auth.decorators import login_required
 
 
+
 def index(request):
     activeListings = Listing.objects.filter(active=True)
+    current_prices = []
+
+    for listing in activeListings:
+        current_price = listing.bids.order_by('-amount').first().amount if listing.bids.exists() else 0
+        current_prices.append(current_price)
+
+    listings_with_prices = zip(activeListings, current_prices)
+
     return render(request, "auctions/index.html", {
-        "active_listings": activeListings
+        "listings_with_prices": listings_with_prices
     })
 
 
@@ -128,15 +137,32 @@ def listing(request, listing_id):
 def category_listing(request, category_id):
     listings_cat = Listing.objects.filter(active=True, category=category_id)
     category = Category.objects.get(pk=category_id)
+    current_prices = []
+
+    for listing in listings_cat:
+        current_price = listing.bids.order_by('-amount').first().amount if listing.bids.exists() else 0
+        current_prices.append(current_price)
+
+    listings_with_prices = zip(listings_cat, current_prices)
+
     return render(request, "auctions/category.html", { 
-        "listings_cat": listings_cat,
+        "listings_with_prices": listings_with_prices,
         "category": category
     })
 
 @login_required
 def watchlist(request):
+    watchlist_listings = request.user.watchlist.all()
+    current_prices = []
+
+    for listing in watchlist_listings:
+        current_price = listing.bids.order_by('-amount').first().amount if listing.bids.exists() else 0
+        current_prices.append(current_price)
+
+    listings_with_prices = zip(watchlist_listings, current_prices)
+
     return render(request, "auctions/watchlist.html", {
-        "watchlist": request.user.watchlist.all()
+        "listings_with_prices": listings_with_prices
     })
 
 @login_required
