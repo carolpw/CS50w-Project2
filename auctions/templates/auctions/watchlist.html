@@ -1,20 +1,36 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Watchlist</h2>
+    <div class="container">
+        <h2 class="text-center mt-4 mb-4">Watchlist</h2>
 
-    {% for listing, current_price in listings_with_prices %}
-        <h3><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h3>
-        
-        {% if listing.image %}
-            <img src="{{ listing.image.url }}" alt="{{ listing.title }} Image" style="max-width: 150px;">                                                                                                                            
+        {% if listings_with_prices %}
+            <div class="row">
+                {% for listing, current_price in listings_with_prices %}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="row no-gutters">
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title"><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></h5>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Description:</strong> {{ listing.description }}</li>
+                                        <li><strong>Current Price:</strong> ${{ current_price }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                {% if listing.image %}
+                                <img src="{{ listing.image.url }}" class="card-img" alt="{{ listing.title }} Image" style="max-height: 150px;">
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-center">No listings.</p>
         {% endif %}
-
-        <ul>
-            <li>Description: {{ listing.description }}</li>
-            <li>Current Price: ${{ current_price }}</li>
-        </ul>
-    {% empty %}
-    <p>No listings.</p>    
-    {% endfor %}
+    </div>
 {% endblock %}

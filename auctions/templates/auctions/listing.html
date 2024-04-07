@@ -1,66 +1,79 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-      <!-- Display bid errors -->
+    <!-- Display bid errors -->
     {% if messages %}
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
+        <div class="alert alert-danger" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
     {% endif %}
 
     <!-- Display winning message for the signed-in user -->
     {% if winner_message %}
-        <p>{{ winner_message }}</p>
+        <div class="alert alert-success" role="alert">
+            {{ winner_message }}
+        </div>
     {% endif %}
 
-
     {% if not listing.active %}
-        <p>Auction closed.</p>                                                                                                                       
+        <div class="alert alert-warning" role="alert">
+            Auction closed.
+        </div>
     {% endif %}
 
     <h3>{{ listing.title }}</h3>
 
-    <ul>
-        {% if listing.image %}
-            <img src="{{ listing.image.url }}" alt="{{ listing.title }} Image" style="max-width: 200px;">                                                                                                                        
-        {% endif %}
-
-        <li>Description: {{ listing.description }}</li>
-        <li>Current Price: ${{ current_price }}</li>
-        <li>Owner: {{ listing.owner }}</li>
-        <li>Category: {{ listing.category }}</a></li>
-    </ul>
-
-    <div>
-        {% if user.is_authenticated %}
-            {% if listing in user.watchlist.all %}
-                <a class="text-danger" href="{% url 'unwatch' listing.id %}">Unwatch</a>
-            {% else %}
-                <a class="text-danger" href="{% url 'watch' listing.id %}">Watch</a>
+    <div class="row">
+        <div class="col-md-4">
+            {% if listing.image %}
+                <img src="{{ listing.image.url }}" alt="{{ listing.title }} Image" class="img-fluid">
             {% endif %}
-        {% endif %}
+        </div>
+        <div class="col-md-8">
+            <ul class="list-unstyled">
+                <li><strong>Description:</strong> {{ listing.description }}</li>
+                <li><strong>Current Price:</strong> ${{ current_price }}</li>
+                <li><strong>Owner:</strong> {{ listing.owner }}</li>
+                <li><strong>Category:</strong> {{ listing.category }}</li>
+            </ul>
+
+            {% if user.is_authenticated %}
+                <div>
+                    {% if listing in user.watchlist.all %}
+                        <a class="btn btn-danger" href="{% url 'unwatch' listing.id %}">Unwatch</a>
+                    {% else %}
+                        <a class="btn btn-danger" href="{% url 'watch' listing.id %}">Watch</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if listing.active %}
+                <!-- Bid form -->
+                {% if not listing.owner == user %}
+                    <form method="post" action="{% url 'place_bid' listing_id=listing.id %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="bid_amount">Bid Amount:</label>
+                            <input type="number" id="bid_amount" name="bid_amount" step="any" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Place Bid</button>
+                    </form>
+                {% endif %}
+
+                <!-- Close auction form (for listing creator) -->
+                {% if user.is_authenticated and user == listing.owner %}
+                    <form method="post" action="{% url 'close_auction' listing_id=listing.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Close Auction</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        </div>
     </div>
 
-
-    {% if listing.active %}
-        <!-- Bid form -->
-        {% if not listing.owner == user %}
-            <form method="post" action="{% url 'place_bid' listing_id=listing.id %}">
-                {% csrf_token %}
-                <label for="bid_amount">Bid Amount:</label>
-                <input type="number" id="bid_amount" name="bid_amount" step="any" required>
-                <button type="submit">Place Bid</button>
-            </form>
-        {% endif %}
-
-        <!-- Close auction form (for listing creator) -->
-        {% if user.is_authenticated and user == listing.owner %}
-            <form method="post" action="{% url 'close_auction' listing_id=listing.id %}">
-            {% csrf_token %}
-            <button type="submit">Close Auction</button>
-            </form>
-        {% endif %}
-    {% endif %}
+    <hr>
 
     <section>
         <h3>Comments:</h3>
@@ -69,24 +82,21 @@
         {% else %}
             {% for comment in listing.comments.all %}
                 <hr>
-                <strong>{{ comment.author }} - {{ comment.date_added}} </strong>
-                <br>
-                {{ comment.text }}
+                <strong>{{ comment.author }} - {{ comment.date_added }}</strong>
+                <p>{{ comment.text }}</p>
             {% endfor %}    
         {% endif %}
 
         {% if user.is_authenticated %}
             <form action="{% url 'listing' listing.id %}" method="POST">
                 {% csrf_token %}
-                {{ form.text }}
-                <input class="btn btn-lg btn-outline-secondary" type="submit" value="Add">
+                <div class="form-group">
+                    {{ form.text }}
+                </div>
+                <button class="btn btn-outline-secondary" type="submit">Add Comment</button>
             </form>
         {% else %}
             <p>Please log in to add a comment.</p>
         {% endif %}
-
-        
     </section>
-
-
 {% endblock %}
