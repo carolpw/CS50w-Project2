@@ -6,6 +6,7 @@ from django.urls import reverse
 from .models import User, Listing, Category, Bid
 from .forms import ListingForm, CommentForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 
 
@@ -112,6 +113,13 @@ def listing(request, listing_id):
     current_price = listing.bids.order_by('-amount').first().amount if listing.bids.exists() else 0
     in_watchlist = True
     form = None
+    highest_bid = listing.bids.order_by('-amount').first()  # Retrieve the highest bid for the listing
+
+    # Check if there is a winning bid and if the signed-in user matches the highest bidder
+    if highest_bid and request.user.is_authenticated and request.user == highest_bid.user:
+        winner_message = f"Congratulations! You have won this auction for {listing.title}."
+    else:
+        winner_message = None
 
     #Comment section
     if request.user.is_authenticated:
@@ -131,7 +139,8 @@ def listing(request, listing_id):
         "listing": listing,
         "current_price": current_price,
         "in_watchlist": in_watchlist,
-        "form": form
+        "form": form,
+        "winner_message": winner_message,
     })
 
 def category_listing(request, category_id):
@@ -179,3 +188,42 @@ def unwatch(request, listing_id):
     request.user.save()
     return HttpResponseRedirect(reverse('index'))
 
+@login_required
+def place_bid(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+    if request.method == 'POST':
+        bid_amount = float(request.POST.get('bid_amount'))
+        highest_bid = listing.bids.order_by('-amount').first()
+
+        if highest_bid and bid_amount <= highest_bid.amount:
+            messages.error(request, "Bid must be greater than any other bids.")
+        else:
+            bid = Bid(user=request.user, amount=bid_amount, listing=listing)
+            bid.save()
+            messages.success(request, "Bid placed successfully!")
+            return HttpResponseRedirect(reverse('listing', args=(listing_id, )))
+
+    return HttpResponseRedirect(reverse('listing', args=(listing_id, )))
+
+
+@login_required
+def close_auction(request, listing_id):
+    listing = Listing.objects.get(pk=listing_id)
+
+    # Check if the user is signed in and is the creator of the listing
+    if request.user == listing.owner:
+        # Close the auction
+        highest_bid = listing.bids.order_by('-amount').first()
+        if highest_bid:
+            # Update the listing to mark it as inactive
+            listing.active = False
+            listing.save()
+
+            # Mark the highest bidder as the winner (you might have additional logic here)
+            winner = highest_bid.user
+
+            messages.success(request, f"Auction closed. {winner.username} is the winner!")
+        else:
+            messages.error(request, "No bids have been placed for this listing.")
+
+    return HttpResponseRedirect(reverse('listing', args=(listing_id, )))
