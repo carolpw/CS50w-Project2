@@ -116,7 +116,7 @@ def listing(request, listing_id):
     highest_bid = listing.bids.order_by('-amount').first()  # Retrieve the highest bid for the listing
 
     # Check if there is a winning bid and if the signed-in user matches the highest bidder
-    if highest_bid and request.user.is_authenticated and request.user == highest_bid.user:
+    if highest_bid and request.user.is_authenticated and request.user == highest_bid.user and listing.active == False:
         winner_message = f"Congratulations! You have won this auction for {listing.title}."
     else:
         winner_message = None

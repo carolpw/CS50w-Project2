@@ -47,27 +47,27 @@
                         <a class="btn btn-danger" href="{% url 'watch' listing.id %}">Watch</a>
                     {% endif %}
                 </div>
-            {% endif %}
 
-            {% if listing.active %}
-                <!-- Bid form -->
-                {% if not listing.owner == user %}
-                    <form method="post" action="{% url 'place_bid' listing_id=listing.id %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="bid_amount">Bid Amount:</label>
-                            <input type="number" id="bid_amount" name="bid_amount" step="any" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Place Bid</button>
-                    </form>
-                {% endif %}
+                {% if listing.active %}
+                    <!-- Bid form -->
+                    {% if not listing.owner == user %}
+                        <form method="post" action="{% url 'place_bid' listing_id=listing.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="bid_amount">Bid Amount:</label>
+                                <input type="number" id="bid_amount" name="bid_amount" step="any" class="form-control" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Place Bid</button>
+                        </form>
+                    {% endif %}
 
-                <!-- Close auction form (for listing creator) -->
-                {% if user.is_authenticated and user == listing.owner %}
-                    <form method="post" action="{% url 'close_auction' listing_id=listing.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Close Auction</button>
-                    </form>
+                    <!-- Close auction form (for listing creator) -->
+                    {% if user == listing.owner %}
+                        <form method="post" action="{% url 'close_auction' listing_id=listing.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">Close Auction</button>
+                        </form>
+                    {% endif %}
                 {% endif %}
             {% endif %}
         </div>
